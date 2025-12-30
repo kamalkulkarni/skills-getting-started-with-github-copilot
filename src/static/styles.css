@@ -126,6 +126,54 @@ section h3 {
   word-break: break-all;
 }
 
+/* Remove list bullets (reinforce) */
+.participant-list {
+  list-style: none;
+}
+
+/* Remove participant button */
+.remove-participant {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #c62828;
+  font-size: 18px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.remove-participant:hover {
+  background: rgba(198,40,40,0.08);
+}
+
+.remove-participant:focus {
+  outline: 2px solid rgba(26,35,126,0.15);
+}
+
+/* Ensure SVG icon sizes and uses currentColor */
+.remove-participant svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .participant-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .participant {
+    flex: 0 0 calc(50% - 8px);
+  }
+}
+
 @media (min-width: 768px) {
   .participant-list {
     flex-direction: row;

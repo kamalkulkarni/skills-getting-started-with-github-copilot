@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
-      const response = await fetch("/activities");
+      const response = await fetch("/activities", { cache: 'no-store' });
       const activities = await response.json();
 
       // Clear loading message and activity options
@@ -58,6 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
           details.participants.forEach(email => {
             const li = document.createElement('li');
             li.className = 'participant';
+            li.dataset.email = email;
 
             const avatar = document.createElement('span');
             avatar.className = 'avatar';
@@ -67,8 +68,50 @@ document.addEventListener("DOMContentLoaded", () => {
             label.className = 'participant-email';
             label.textContent = email;
 
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-participant';
+            removeBtn.type = 'button';
+            removeBtn.title = `Remove ${email}`;
+            removeBtn.setAttribute('aria-label', `Remove ${email}`);
+            removeBtn.innerHTML = `
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            `;
+
+            // Remove participant handler
+            removeBtn.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              if (!confirm(`Remove ${email} from ${name}?`)) return;
+              try {
+                const res = await fetch(
+                  `/activities/${encodeURIComponent(name)}/participants?email=${encodeURIComponent(email)}`,
+                  { method: 'DELETE', cache: 'no-store' }
+                );
+                const data = await res.json();
+                if (res.ok) {
+                  messageDiv.textContent = data.message;
+                  messageDiv.className = 'success';
+                  messageDiv.classList.remove('hidden');
+                  // Refresh view
+                  fetchActivities();
+                  setTimeout(() => messageDiv.classList.add('hidden'), 5000);
+                } else {
+                  messageDiv.textContent = data.detail || 'An error occurred';
+                  messageDiv.className = 'error';
+                  messageDiv.classList.remove('hidden');
+                }
+              } catch (err) {
+                messageDiv.textContent = 'Failed to remove participant. Please try again.';
+                messageDiv.className = 'error';
+                messageDiv.classList.remove('hidden');
+                console.error('Error removing participant:', err);
+              }
+            });
+
             li.appendChild(avatar);
             li.appendChild(label);
+            li.appendChild(removeBtn);
             list.appendChild(li);
           });
 
@@ -108,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `/activities/${encodeURIComponent(activity)}/signup?email=${encodeURIComponent(email)}`,
         {
           method: "POST",
+          cache: 'no-store'
         }
       );
 
